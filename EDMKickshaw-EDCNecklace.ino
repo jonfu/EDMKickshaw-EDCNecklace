@@ -1,10 +1,13 @@
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
  
-#define PIN 9
+#define VCC 9
+#define PIN A5
 #define STRIPSIZE 24
-#define SELFLOCKGND 6
+#define GND1 3
+#define GND2 10
 
+const unsigned long maxTime = 4294967295;
 
 const long interlude = 16; //default should be 20
 const int totalInterludeMode = 5;
@@ -30,6 +33,8 @@ int RGB = 0;
 int RGB_val[3];
 
 boolean enableInterlude = false;
+
+byte mode;
 
  
 // Pattern types supported:
@@ -393,20 +398,39 @@ class NeoPatterns : public Adafruit_NeoPixel
 NeoPatterns strip(STRIPSIZE, PIN, NEO_GRB + NEO_KHZ800, NULL);
  
 void setup() {
-
-  //self-locking switch GND
-  pinMode(SELFLOCKGND, OUTPUT);
-  digitalWrite(SELFLOCKGND, LOW);
-
- 
-  strip.begin();
   
-  strip.Scanner(strip.Color(255,0,0), SCANNERINTERVAL);
+  mode = EEPROM.read(0);
+  
+  if (mode == 0) {
+    
+    EEPROM.write(0, 1);
+
+    pinMode(GND1, OUTPUT);
+    pinMode(GND2, OUTPUT);
+    pinMode(VCC, OUTPUT);
+    digitalWrite(GND1, LOW);
+    digitalWrite(GND2, LOW);
+    digitalWrite(VCC, HIGH);
+  
+   
+    strip.begin();
+    
+    strip.Scanner(strip.Color(255,0,0), SCANNERINTERVAL);
+  
+  } else {
+    
+    EEPROM.write(0, 0);
+    
+  }
 
 
 }
  
 void loop() {
+  
+  
+  
+ if (mode == 0) {
   
   if (enableInterlude) {
     
@@ -511,6 +535,17 @@ void loop() {
     //strip.setBrightness(100);
     strip.Update();
   }
+  
+  
+  
+  
+ } else {
+   
+   delay(maxTime);
+   
+ }
+  
+  
   
 
 }
