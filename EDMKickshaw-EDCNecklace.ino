@@ -1,5 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
+#include <avr/power.h>
+#include <avr/sleep.h>
  
 #define VCC 9
 #define PIN A5
@@ -7,9 +9,11 @@
 #define GND1 3
 #define GND2 10
 
+const boolean USE_EEPROM = false;
+
 const unsigned long maxTime = 4294967295;
 
-const long interlude = 16; //default should be 20
+const long interlude = 8; //default should be 20
 const int totalInterludeMode = 5;
 const int maxColorWipe = 5;
 const int totalColorChase = 10;
@@ -17,7 +21,7 @@ const int totalColorChase = 10;
 const byte SCANNERINTERVAL = 40;
 const byte WIPEINTERVAL = 10;
 const byte CHASEINTERVAL = 10;
-const byte BRI_SCANNER = 100;
+const byte BRI_SCANNER = 80;
 const byte BRI_THEATER = 20;
 const byte BRI_RAINBOW = 5;
 const byte BRI_WIPE = 10;
@@ -405,6 +409,19 @@ void setup() {
     
     EEPROM.write(0, 1);
 
+  
+  } else {
+    
+    EEPROM.write(0, 0);
+    
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    
+    sleep_mode();
+    
+  }
+  
+  
+
     pinMode(GND1, OUTPUT);
     pinMode(GND2, OUTPUT);
     pinMode(VCC, OUTPUT);
@@ -415,13 +432,7 @@ void setup() {
    
     strip.begin();
     
-    strip.Scanner(strip.Color(255,0,0), SCANNERINTERVAL);
-  
-  } else {
-    
-    EEPROM.write(0, 0);
-    
-  }
+    strip.Scanner(strip.Color(255,0,0), SCANNERINTERVAL);  
 
 
 }
@@ -430,7 +441,7 @@ void loop() {
   
   
   
- if (mode == 0) {
+ //if (mode == 0) {
   
   if (enableInterlude) {
     
@@ -539,11 +550,11 @@ void loop() {
   
   
   
- } else {
+ //} else {
    
-   delay(maxTime);
+ //  delay(maxTime);
    
- }
+ //}
   
   
   
